@@ -1,4 +1,5 @@
 using UnityEngine;
+using static GameEvents;
 
 public class EnemyController : MonoBehaviour, IDamageable
 {
@@ -38,10 +39,4 @@ public class EnemyController : MonoBehaviour, IDamageable
         // Destroy this enemy
         Destroy(gameObject);
     }
-}
-
-// Event class for enemy destruction
-public class EnemyDestroyedEvent
-{
-    public EnemyController Enemy;
 }

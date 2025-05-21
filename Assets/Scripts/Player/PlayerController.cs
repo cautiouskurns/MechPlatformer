@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using static GameEvents;
 
 public class PlayerController : MonoBehaviour, IDamageable
 {

@@ -1,11 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-// Event definitions
-public class PlayerDiedEvent
-{
-    public PlayerController Player;
-}
+using static GameEvents;
 
 public class GameManager : MonoBehaviour
 {
