@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Reflection;
 
 /// <summary>
 /// Sets up placeholder graphics for development testing
@@ -47,19 +48,53 @@ public class SetupPlaceholders : MonoBehaviour
             player.tag = "Player";
             
             // Add GroundCheck
-            if (GameObject.Find("GroundCheck") == null)
+            Transform existingGroundCheck = player.transform.Find("GroundCheck");
+            if (existingGroundCheck == null)
             {
                 GameObject groundCheck = new GameObject("GroundCheck");
                 groundCheck.transform.SetParent(player.transform);
                 groundCheck.transform.localPosition = new Vector3(0, -0.5f, 0);
+                Debug.Log("Created GroundCheck as child of Player");
+                
+                // Directly assign the reference to any PlatformerController
+                PlatformerController platformerController = player.GetComponent<PlatformerController>();
+                if (platformerController != null)
+                {
+                    // Use reflection directly to set the private field
+                    FieldInfo field = platformerController.GetType().GetField("groundCheck", 
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    if (field != null)
+                    {
+                        field.SetValue(platformerController, groundCheck.transform);
+                        Debug.Log("Directly assigned groundCheck to PlatformerController");
+                    }
+                }
             }
             
             // Add FirePoint
-            if (GameObject.Find("FirePoint") == null)
+            Transform existingFirePoint = player.transform.Find("FirePoint");
+            if (existingFirePoint == null)
             {
                 GameObject firePoint = new GameObject("FirePoint");
                 firePoint.transform.SetParent(player.transform);
                 firePoint.transform.localPosition = new Vector3(0.5f, 0, 0);
+                Debug.Log("Created FirePoint as child of Player");
+                
+                // Directly assign the reference to any MechController
+                MechController mechController = player.GetComponent<MechController>();
+                if (mechController != null)
+                {
+                    // Use reflection directly to set the private field
+                    FieldInfo field = mechController.GetType().GetField("firePoint", 
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    if (field != null)
+                    {
+                        field.SetValue(mechController, firePoint.transform);
+                        Debug.Log("Directly assigned firePoint to MechController");
+                    }
+                }
             }
         }
         
@@ -221,3 +256,5 @@ public class SetupPlaceholders : MonoBehaviour
         }
     }
 }
+
+

@@ -32,6 +32,34 @@ public class PlatformerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerController = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
+        
+        // Check if groundCheck is assigned
+        if (groundCheck == null)
+        {
+            // Try to find existing GroundCheck
+            Transform existingGroundCheck = transform.Find("GroundCheck");
+            if (existingGroundCheck != null)
+            {
+                groundCheck = existingGroundCheck;
+                Debug.Log("Found and assigned existing GroundCheck");
+            }
+            else
+            {
+                // Try to find a GroundCheck in the scene
+                GameObject groundCheckObj = GameObject.Find("GroundCheck");
+                if (groundCheckObj != null)
+                {
+                    groundCheck = groundCheckObj.transform;
+                    Debug.Log("Found and assigned GroundCheck from scene");
+                }
+            }
+        }
+        
+        // Check if groundLayers is assigned
+        if (groundLayers.value == 0)
+        {
+            groundLayers = LayerMask.GetMask("Default");
+        }
     }
     
     private void Update()
@@ -77,8 +105,30 @@ public class PlatformerController : MonoBehaviour
             }
         }
         
-        // Check if player is on ground
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayers);
+        // Check if player is on ground - with null check for safety
+        if (groundCheck != null)
+        {
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayers);
+        }
+        else
+        {
+            // If groundCheck is not assigned, try to find it
+            GameObject groundCheckObj = GameObject.Find("GroundCheck");
+            if (groundCheckObj != null)
+            {
+                groundCheck = groundCheckObj.transform;
+                Debug.Log("Auto-assigned groundCheck reference");
+            }
+            else
+            {
+                Debug.LogWarning("GroundCheck object not found. Creating one...");
+                // Create a ground check if it doesn't exist
+                GameObject newGroundCheck = new GameObject("GroundCheck");
+                newGroundCheck.transform.SetParent(transform);
+                newGroundCheck.transform.localPosition = new Vector3(0, -0.5f, 0);
+                groundCheck = newGroundCheck.transform;
+            }
+        }
         
         // Update dash state
         if (isDashing)

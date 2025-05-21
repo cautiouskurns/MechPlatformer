@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
@@ -9,7 +10,7 @@ public static class EditorStartup
     static EditorStartup()
     {
         // Subscribe to the scene opened event
-        EditorApplication.sceneOpened += OnSceneOpened;
+        EditorSceneManager.sceneOpened += OnSceneOpened;
         
         // Also run on editor startup
         if (EditorApplication.isPlayingOrWillChangePlaymode == false)
@@ -55,7 +56,10 @@ public static class EditorStartup
         // Try to find the tag
         try
         {
-            if (!UnityEditorInternal.InternalEditorUtility.tags.Contains(tagName))
+            string[] tags = UnityEditorInternal.InternalEditorUtility.tags;
+            bool tagExists = System.Array.IndexOf(tags, tagName) != -1;
+            
+            if (!tagExists)
             {
                 Debug.LogWarning($"Tag '{tagName}' does not exist. Please add it manually in Edit > Project Settings > Tags and Layers.");
             }
