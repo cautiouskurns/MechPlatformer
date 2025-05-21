@@ -86,25 +86,70 @@ public class RuntimePrefabCreator : MonoBehaviour
     
     private void SetupPlayerMechController(GameObject player)
     {
-        // Set the projectile as a reference in MechController
-        GameObject firePoint = GameObject.Find("FirePoint");
-        GameObject projectile = GameObject.Find("Projectile");
         MechController mechController = player.GetComponent<MechController>();
+        if (mechController == null) return;
         
-        if (firePoint != null && projectile != null && mechController != null)
+        // Set the firePoint reference
+        GameObject firePoint = GameObject.Find("FirePoint");
+        if (firePoint == null)
         {
-            // Set firePoint reference
-            SetPrivateField(mechController, "firePoint", firePoint.transform);
-            
-            // Set projectile prefab reference
-            SetPrivateField(mechController, "projectilePrefab", projectile);
-            
-            Debug.Log("Set up firePoint and projectilePrefab references in MechController");
+            // Create FirePoint if it doesn't exist
+            firePoint = new GameObject("FirePoint");
+            firePoint.transform.SetParent(player.transform);
+            firePoint.transform.localPosition = new Vector3(0.5f, 0, 0);
+            Debug.Log("Created new FirePoint GameObject");
         }
-        else
+        
+        // Set firePoint reference
+        SetPrivateField(mechController, "firePoint", firePoint.transform);
+        Debug.Log("Set up firePoint reference in MechController");
+        
+        // Handle projectile reference
+        GameObject projectile = GameObject.Find("Projectile");
+        if (projectile == null)
         {
-            Debug.LogWarning("Could not set up MechController references - missing components");
+            // Try to create a projectile if it doesn't exist
+            projectile = new GameObject("Projectile");
+            projectile.transform.position = new Vector3(0, -10, 0);
+            projectile.AddComponent<SpriteRenderer>();
+            BoxCollider2D collider = projectile.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = new Vector2(0.5f, 0.5f);
+            
+            Rigidbody2D rb = projectile.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            
+            projectile.AddComponent<Projectile>();
+            projectile.tag = "Projectile";
+            projectile.SetActive(false); // Hide initially
+            Debug.Log("Created new Projectile GameObject");
+            
+            // Try to set up a placeholder sprite
+            try {
+                System.Type placeholdersType = System.Type.GetType("PlaceholderSprites");
+                if (placeholdersType != null)
+                {
+                    System.Reflection.MethodInfo method = placeholdersType.GetMethod("CreateCircleSprite");
+                    if (method != null && method.IsStatic)
+                    {
+                        Sprite sprite = method.Invoke(null, new object[] { Color.yellow }) as Sprite;
+                        if (sprite != null && projectile.GetComponent<SpriteRenderer>() != null)
+                        {
+                            projectile.GetComponent<SpriteRenderer>().sprite = sprite;
+                        }
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Failed to set projectile sprite: {e.Message}");
+            }
         }
+        
+        // Set projectile prefab reference
+        SetPrivateField(mechController, "projectilePrefab", projectile);
+        Debug.Log("Set up projectilePrefab reference in MechController");
     }
     
     private void EnsurePlayerComponents(GameObject player)

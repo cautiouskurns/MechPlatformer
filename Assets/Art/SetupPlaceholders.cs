@@ -172,30 +172,62 @@ public class SetupPlaceholders : MonoBehaviour
     void SetupProjectileSprite()
     {
         GameObject projectile = GameObject.Find("Projectile");
-        if (projectile != null)
+        if (projectile == null)
         {
-            Debug.Log("Setting up Projectile placeholder sprite");
-            Sprite projectileSprite = PlaceholderSprites.CreateCircleSprite(Color.yellow);
-            PlaceholderSprites.ApplySprite(projectile, projectileSprite);
-            
-            // Configure components
-            BoxCollider2D collider = projectile.GetComponent<BoxCollider2D>();
-            if (collider != null)
-            {
-                collider.size = new Vector2(0.5f, 0.5f);
-                collider.isTrigger = true;
-            }
-            
-            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.gravityScale = 0;
-                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            }
-            
-            // Hide it initially - it's just for creating the prefab
-            projectile.SetActive(false);
+            // Create a projectile if it doesn't exist
+            projectile = new GameObject("Projectile");
+            projectile.transform.position = new Vector3(0, -10, 0); // Out of view initially
+            projectile.AddComponent<SpriteRenderer>();
+            projectile.AddComponent<BoxCollider2D>();
+            projectile.AddComponent<Rigidbody2D>();
+            projectile.AddComponent<Projectile>();
+            projectile.tag = "Projectile";
+            Debug.Log("Created new Projectile GameObject");
         }
+        
+        Debug.Log("Setting up Projectile placeholder sprite");
+        Sprite projectileSprite = PlaceholderSprites.CreateCircleSprite(Color.yellow);
+        PlaceholderSprites.ApplySprite(projectile, projectileSprite);
+            
+        // Configure components
+        BoxCollider2D collider = projectile.GetComponent<BoxCollider2D>();
+        if (collider != null)
+        {
+            collider.size = new Vector2(0.5f, 0.5f);
+            collider.isTrigger = true;
+        }
+        else
+        {
+            collider = projectile.AddComponent<BoxCollider2D>();
+            collider.size = new Vector2(0.5f, 0.5f);
+            collider.isTrigger = true;
+        }
+        
+        Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.gravityScale = 0;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
+        else
+        {
+            rb = projectile.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
+        
+        // Make sure it has a Projectile component
+        if (projectile.GetComponent<Projectile>() == null)
+        {
+            projectile.AddComponent<Projectile>();
+        }
+        
+        // Hide it initially - it's just for creating the prefab
+        projectile.SetActive(false);
     }
     
     void SetupGroundSprite()
